@@ -24,9 +24,9 @@ connection = sqlite3.connect('./database.sqlite3', check_same_thread=False)
 cursor = connection.cursor()
 
 # API keys
-#WEATHER_API_KEY = "b38afbc193795726083763cb8303718b"
-#AQI_API_KEY = "af24c2ce21ec3076cdc8295685020505"
-#NEWS_API_KEY = "pub_60491a68299253d0f8fb3af5da4a31facb78f"
+#WEATHER_API_KEY 
+#AQI_API_KEY 
+#NEWS_API_KEY 
 cord={}
 @app.route('/')
 def home():
