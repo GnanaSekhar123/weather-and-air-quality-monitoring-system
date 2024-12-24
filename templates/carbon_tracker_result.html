@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon Emissions History</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* General body and layout styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-top: 20px;
+        }
+
+        h3, h4 {
+            color: #4CAF50;
+        }
+
+        /* Main container for the content */
+        .container {
+            width: 85%;
+            margin: 30px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button styles */
+        .button-link {
+            margin: 20px;
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .button-link:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Chart container styles */
+        #chart-container {
+            width: 100%;
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #carbonChart {
+            width: 80%;
+            height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Category list styles */
+        .category-list {
+            text-align: left;
+            margin-top: 30px;
+            font-size: 18px;
+        }
+
+        .category-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Footer and last updated info */
+        .footer {
+            margin-top: 30px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .button-link {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            #carbonChart {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Carbon Emissions History</h1>
+
+        <!-- Display the Aggregated Carbon Footprint -->
+        <h3>Your Total Carbon Emissions: {{ total_carbon_emissions }} kg CO2</h3>
+        <h4>Last Updated: {{ last_updated }}</h4>
+
+        <div class="category-list">
+            <h3>Category-wise Breakdown:</h3>
+            <ul>
+                {% for item in carbon_footprint %}
+                    <li>{{ item.category }}: {{ item.value }} kg CO2</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="chart-container">
+            <div id="carbonChart"></div>
+        </div>
+
+        <!-- Leaderboard Button -->
+        <div>
+            <a href="/leaderboard" class="button-link">Go to Leaderboard</a>
+        </div>
+
+        <div class="footer">
+            <p>Keep track of your progress and make better choices for a greener tomorrow!</p>
+        </div>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        // Safely handle the passed carbonData
+        const carbonData = JSON.parse('{{ carbon_data | tojson | safe }}' || '[]');
+
+        console.log("Carbon Data:", carbonData);
+
+
+        // Extract Dates and Values
+        const Dates = carbonData.map(item => item.date);
+        const values = carbonData.map(item => item.value);
+
+        // Create the Plotly Graph
+        const trace = {
+            x: Dates,
+            y: values,
+            type: 'line',
+            name: 'Total Carbon Footprint',
+            marker: { color: 'rgba(255, 99, 132, 1)' }
+        };
+
+        const layout = {
+            title: 'maximum Carbon Emissions by Date',
+            xaxis: { title: 'date' },
+            yaxis: { title: 'Carbon Footprint (kg CO2)', rangemode: 'tozero' },
+            plot_bgcolor: "#f9f9f9",
+            paper_bgcolor: "#fff",
+            font: { family: "Arial, sans-serif", size: 14 },
+            margin: { t: 40, b: 40, l: 60, r: 40 }
+        };
+
+        const data = [trace];
+
+        // Plot the chart
+        Plotly.newPlot('carbonChart', data, layout);
+    </script>
+
+</body>
+</html>

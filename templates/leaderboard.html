@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <style>
+        /* General body and layout styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-top: 30px;
+        }
+
+        /* Header Links */
+        .button-link {
+            margin: 15px;
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .button-link:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Leaderboard Table Styles */
+        table {
+            width: 90%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+        }
+
+        td {
+            background-color: #f9f9f9;
+            color: #333;
+            font-size: 16px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .button-link {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            table {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        /* Additional Footer Styling */
+        .footer {
+            margin-top: 50px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        /* Add spacing to the button links section */
+        .button-container {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Leaderboard</h1>
+
+    <!-- Header Links -->
+    <div class="button-container">
+        <a href="{{url_for('home') }}" class="button-link">Home</a>
+        <a href="{{url_for('carbon_tracker') }}" class="button-link">Carbon Tracker</a>
+        <a href="/community" class="button-link">Community</a>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <table id="leaderboard-table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>city</th>
+                <th>Rank</th>
+                <th>Total Carbon Emission (kg CO2)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <!-- Footer Section -->
+    <div class="footer">
+        <p>Stay motivated and continue reducing your carbon footprint!</p>
+    </div>
+
+    <script>
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('/fetch_leaderboard');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch leaderboard data.');
+                }
+                const leaderboardData = await response.json();
+
+                const tableBody = document.querySelector('#leaderboard-table tbody');
+                tableBody.innerHTML = ''; // Clear any existing rows
+
+                leaderboardData.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.user_id}</td>
+                        <td>${entry.city}</td>
+                        <td>${entry.rank}</td>
+                        <td>${entry.total_emissions.toFixed(2)}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                alert('Failed to fetch leaderboard data. Please try again later.');
+            }
+        }
+
+        // Load leaderboard on page load
+        window.onload = loadLeaderboard;
+    </script>
+
+</body>
+</html>

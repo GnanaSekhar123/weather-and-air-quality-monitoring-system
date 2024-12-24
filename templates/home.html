@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 350px;
+        }
+        .container h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .container a {
+            display: inline-block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .login-link {
+            background-color: #007bff;
+        }
+        .login-link:hover {
+            background-color: #0056b3;
+        }
+        .register-link {
+            background-color: #28a745;
+        }
+        .register-link:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        <a href="{{ url_for('login') }}" class="login-link">Login</a>
+        <a href="{{ url_for('register') }}" class="register-link">Register</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Page</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container Styling */
+        .register-container {
+            background-color: #ffffff;
+            color: #333;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Header */
+        .register-container h2 {
+            margin-bottom: 20px;
+        }
+
+        /* Input Group */
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Button */
+        button {
+            background-color: #ff7eb3;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #ff758c;
+        }
+
+        /* Login Link */
+        .login-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #ff7eb3;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Error Message */
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <form id="registerForm" action="/register" method="post" onsubmit="return validateForm()">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username">
+                <p id="usernameError" class="error"></p>
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+                <p id="emailError" class="error"></p>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password">
+                <p id="passwordError" class="error"></p>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm_password">
+                <p id="confirmPasswordError" class="error"></p>
+            </div>
+            <button type="submit">Register</button>
+            <p class="login-link">Already have an account? <a href="/login">Login</a></p>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            // Reset previous error messages
+            document.getElementById('usernameError').innerText = '';
+            document.getElementById('emailError').innerText = '';
+            document.getElementById('passwordError').innerText = '';
+            document.getElementById('confirmPasswordError').innerText = '';
+
+            var username = document.getElementById('username').value;
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var confirmPassword = document.getElementById('confirm-password').value;
+            var valid = true;
+
+            // Check if username is empty
+            if (username.trim() === '') {
+                document.getElementById('usernameError').innerText = 'Please enter your username';
+                valid = false;
+            }
+
+            // Check if email is empty
+            if (email.trim() === '') {
+                document.getElementById('emailError').innerText = 'Please enter your email';
+                valid = false;
+            }
+
+            // Check if password is empty
+            if (password.trim() === '') {
+                document.getElementById('passwordError').innerText = 'Please enter your password';
+                valid = false;
+            }
+
+            // Check if confirm password is empty or does not match password
+            if (confirmPassword.trim() === '') {
+                document.getElementById('confirmPasswordError').innerText = 'Please confirm your password';
+                valid = false;
+            } else if (confirmPassword !== password) {
+                document.getElementById('confirmPasswordError').innerText = 'Passwords do not match';
+                valid = false;
+            }
+
+            return valid;
+        }
+    </script>
+</body>
+</html>

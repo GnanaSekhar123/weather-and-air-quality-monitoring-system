@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Environment Dashboard</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #fff;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        nav {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+
+
+        .search-bar {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar input {
+            padding: 12px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+            font-size: 1.1em;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .search-bar button {
+            padding: 12px 20px;
+            margin-left: 10px;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-bar button:hover {
+            background-color: #2980b9;
+        }
+
+        .weather-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+
+        .card p {
+            font-size: 1.7em;
+            margin: 0;
+            color: #333;
+        }
+
+        .card:nth-child(even) {
+            background-color: #ecf0f1;
+        }
+
+        .card:nth-child(odd) {
+            background-color: #bdc3c7;
+        }
+        .news-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .news-item {
+        margin-bottom: 20px;
+    }
+
+    .news-card {
+        display: flex;
+        align-items: flex-start;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .news-image {
+        width: 150px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .news-content {
+        padding: 10px;
+        flex: 1;
+    }
+
+    .news-content h4 {
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .news-content p {
+        margin: 5px 0 0;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .news-content a {
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    .news-content a:hover {
+        text-decoration: underline;
+    }
+    .loader {
+        transform: rotateZ(45deg);
+        perspective: 1000px;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        color: #fff;
+      }
+        .loader:before,
+        .loader:after {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: inherit;
+          height: inherit;
+          border-radius: 50%;
+          transform: rotateX(70deg);
+          animation: 1s spin linear infinite;
+        }
+        .loader:after {
+          color: #FF3D00;
+          transform: rotateY(70deg);
+          animation-delay: .4s;
+        }
+
+      @keyframes rotate {
+        0% {
+          transform: translate(-50%, -50%) rotateZ(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotateZ(360deg);
+        }
+      }
+
+      @keyframes rotateccw {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(-360deg);
+        }
+      }
+
+      @keyframes spin {
+        0%,
+        100% {
+          box-shadow: .2em 0px 0 0px currentcolor;
+        }
+        12% {
+          box-shadow: .2em .2em 0 0 currentcolor;
+        }
+        25% {
+          box-shadow: 0 .2em 0 0px currentcolor;
+        }
+        37% {
+          box-shadow: -.2em .2em 0 0 currentcolor;
+        }
+        50% {
+          box-shadow: -.2em 0 0 0 currentcolor;
+        }
+        62% {
+          box-shadow: -.2em -.2em 0 0 currentcolor;
+        }
+        75% {
+          box-shadow: 0px -.2em 0 0 currentcolor;
+        }
+        87% {
+          box-shadow: .2em -.2em 0 0 currentcolor;
+        }
+      }
+   
+
+        /* Optional: Styling for weather info */
+        #weather-info {
+            margin-top: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .search-bar input {
+                width: 250px;
+            }
+
+            .weather-info {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Weather & Environment Dashboard</h1>
+        <nav>
+            <a href="{{ url_for('home') }}" class="nav-button">Home</a>
+            <a href="{{ url_for('carbon_tracker') }}" class="nav-button">Carbon Tracker</a>
+            <a href="{{ url_for('community') }}" class="nav-button">Community</a> 
+        </nav>
+        
+    </header>
+    <div class="search-bar">
+        <input type="text" id="city" placeholder="Enter City Name">
+        <button onclick="handleSearch()">Search</button>
+    </div>
+    <!-- Loading spinner -->
+    <div id="loading" class="loader" style="display: none;"></div>
+    <div class="weather-info">
+        <div class="card">
+            <h3>Temperature</h3>
+            <p id="temperature">--°C</p>
+        </div>
+        <div class="card">
+            <h3>Feels Like</h3>
+            <p id="feels-like">--°C</p>
+        </div>
+        <div class="card">
+            <h3>Humidity</h3>
+            <p id="humidity">--%</p>
+        </div>
+        <div class="card">
+            <h3>Wind Speed</h3>
+            <p id="wind-speed">-- KPH</p>
+        </div>
+        <div class="card">
+            <h3>Visibility</h3>
+            <p id="visibility">-- km</p>
+        </div>
+        <div class="card">
+            <h3>Pressure</h3>
+            <p id="pressure">-- hPa</p>
+        </div>
+        <div class="card">
+            <h3>Sunrise</h3>
+            <p id="sunrise">--:--</p>
+        </div>
+        <div class="card">
+            <h3>Sunset</h3>
+            <p id="sunset">--:--</p>
+        </div>
+        <div class="card">
+            <h3>AQI</h3>
+            <p id="aqi">--</p>
+        </div>
+    </div>
+    <div id="charts-section">
+        <h2>Environmental Data Visualization</h2>
+        <div id="charts-container" style="display: flex;justify-content: center;gap:30px;">
+        <div style="width:700px;height: 500px;">
+            <canvas id="weather-chart" style="width: 100%;height:100%;"></canvas>
+        </div>
+        <div style="width: 700px;height:500px;">
+            <canvas id="aqi-chart" style="width:100%; height: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
+<div class="news-section">
+    <h3>Top 5 News</h3>
+    <ul id="news-list" class="news-list"></ul>
+</div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const weatherApiKey = "b38afbc193795726083763cb8303718b";
+        const aqiApiKey = "ba212ec89f250d7aac7592cb44960f1f7fbf1abd";
+        function navigateTo(route) {
+        window.location.href = route;
+    }
+
+        async function getWeather() {
+    const city = document.getElementById("city").value;
+
+    if (!city) {
+        alert("Please enter a city name.");
+        return;
+    }
+
+    try {
+        document.getElementById("loading").style.display = "block";
+        const temp=await fetch(`/weatheraqi/${city}`);
+        const tempJson = await temp.json();  // Convert the response to JSON
+        const weatherData = tempJson.weather_data;
+        const aqiData = tempJson.aqi_data;
+
+        console.log(weatherData);
+        console.log(aqiData);
+       
+
+        // Parse weather data
+        const temperature = weatherData.temperature;
+        const feelsLike = weatherData.feels_like;
+        const humidity = weatherData.humidity;
+        const windSpeed = weatherData.wind_speed; // Convert m/s to KPH
+        const visibility = weatherData.visibility; // Convert meters to KM
+        const pressure = weatherData.pressure;
+        const sunrise = weatherData.sunrise_time;
+        const sunset = weatherData.sunset_time;
+
+        // Parse AQI data
+        const aqi = aqiData.value || 0;
+        // Safely get the AQI description (handle out of bounds cases)
+        const aqiDescription = aqiData.category;
+
+        // Update the DOM
+        document.getElementById("temperature").textContent = `${temperature}°C`;
+        document.getElementById("feels-like").textContent = `${feelsLike}°C`;
+        document.getElementById("humidity").textContent = `${humidity}%`;
+        document.getElementById("wind-speed").textContent = `${windSpeed} KPH`;
+        document.getElementById("visibility").textContent = `${visibility} km`;
+        document.getElementById("pressure").textContent = `${pressure} hPa`;
+        document.getElementById("sunrise").textContent = sunrise;
+        document.getElementById("sunset").textContent = sunset;
+        document.getElementById("aqi").textContent = `${aqi} (${aqiDescription})`;
+    } catch (error) {
+        alert("Failed to fetch data. Please try again.");
+        console.error(error);
+    }
+    finally {
+            // Hide the loading spinner after data is fetched
+            document.getElementById("loading").style.display = "none";
+        }
+}
+ 
+async function handleSearch() {
+    const city = document.getElementById("city").value.trim();
+    if (!city) {
+        alert("Please enter a city name.");
+        return;
+    }
+    try {
+        await getWeather();
+        await loadNews(city);
+        await loadCharts();
+    } catch (error) {
+        console.error("Error handling search:", error);
+    }
+}
+
+// Function to load news based on city
+async function loadNews(city) {
+        try {
+            const response = await fetch(`/get-news/${city}`);
+            const data = await response.json();
+
+            if (data.error) {
+                console.error(data.error);
+                document.getElementById("news-list").innerHTML = "<li>No news available.</li>";
+                return;
+            }
+
+            // Populate the news list
+            const newsList = document.getElementById("news-list");
+            newsList.innerHTML = "";
+            data.forEach(article => {
+                const listItem = document.createElement("li");
+                listItem.classList.add("news-item");
+
+                const imageUrl = article.image_url || '/static/placeholder.png'; // Fallback to placeholder image if no image URL
+                const description = article.description || "No description available."; // Fallback for missing description
+
+                listItem.innerHTML = `
+                    <div class="news-card">
+                        <img src="${imageUrl}" alt="News Image" class="news-image">
+                        <div class="news-content">
+                            <h4><a href="${article.url}" target="_blank">${article.title}</a></h4>
+                
+                        </div>
+                    </div>
+                `;
+                newsList.appendChild(listItem);
+            });
+        } catch (error) {
+            console.error("Error loading news:", error);
+            document.getElementById("news-list").innerHTML = "<li>Error fetching news.</li>";
+        }
+    }
+
+    // Function triggered by the "Search" button
+    function searchCity() {
+        const city = document.getElementById("city").value.trim();
+        if (city) {
+            loadNews(city);
+            loadCharts();
+
+        } else {
+            alert("Please enter a city name.");
+        }
+    }
+
+    // Optional: Trigger search on Enter key
+    document.getElementById("city").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            handleSearch();
+            
+        }
+    });
+    let weatherChartInstance = null;  // Store the weather chart instance
+    let aqiChartInstance = null;      // Store the AQI chart instance
+
+async function loadCharts() {
+    try {
+        // Fetch forecast data from the backend API
+        const response = await fetch('/forecast');
+        const data = await response.json();
+        console.log(data);
+
+        // Extract the temperature and PM2.5 data for the chart
+        const weatherData = [];
+        const aqiData = [];
+        const days = Object.keys(data.temperature_forecast); // Extract days from the keys of the dictionary
+
+        // Populate the weather and AQI data based on the forecast
+        days.forEach(day => {
+            if (data.temperature_forecast[day]) {
+                weatherData.push(data.temperature_forecast[day]);
+            }
+            if (data.pm2_5_forecast[day]) {
+                aqiData.push(data.pm2_5_forecast[day]);
+            }
+        });
+
+        // Weather chart
+        const weatherChartCtx = document.getElementById('weather-chart').getContext('2d');
+        if (weatherChartInstance) {
+            weatherChartInstance.destroy();  // Destroy the previous weather chart instance
+        }
+        weatherChartInstance = new Chart(weatherChartCtx, {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: weatherData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                }]
+            }
+        });
+
+        // AQI chart
+        const aqiChartCtx = document.getElementById('aqi-chart').getContext('2d');
+        if (aqiChartInstance) {
+            aqiChartInstance.destroy();  // Destroy the previous AQI chart instance
+        }
+        aqiChartInstance = new Chart(aqiChartCtx, {
+            type: 'bar',
+            data: {
+                labels: days,
+                datasets: [{
+                    label: 'PM2.5 (µg/m³)',
+                    data: aqiData,
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                }]
+            }
+        });
+
+    } catch (error) {
+        console.error('Error loading forecast data:', error);
+    }
+}
+    </script>
+<script>
+    // Handle Like
+    function handleLike(postId) {
+        fetch(`/like_post/${postId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(`like-count-${postId}`).innerText = `${data.likes} Likes`;
+                alert('Post liked!');
+            })
+            .catch(error => {
+                console.error('Error liking post:', error);
+            });
+    }
+
+    // Handle Comment
+    function handleComment(postId) {
+        const commentText = document.getElementById(`comment-text-${postId}`).value;
+        if (!commentText) {
+            alert('Please enter a comment!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('comment', commentText);
+
+        fetch(`/comment_post/${postId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            const commentsList = document.getElementById(`comments-list-${postId}`);
+            const newComment = document.createElement('li');
+            newComment.innerText = commentText;
+            commentsList.appendChild(newComment);
+            document.getElementById(`comment-text-${postId}`).value = '';
+        })
+        .catch(error => {
+            console.error('Error submitting comment:', error);
+        });
+    }
+</script>
+    
+</body>
+</html>
