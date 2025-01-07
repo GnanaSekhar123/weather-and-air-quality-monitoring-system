@@ -24,10 +24,156 @@ connection = sqlite3.connect('./database.sqlite3', check_same_thread=False)
 cursor = connection.cursor()
 
 # API keys
-#WEATHER_API_KEY 
-#AQI_API_KEY 
-#NEWS_API_KEY 
+#WEATHER_API_KEY = "b38afbc193795726083763cb8303718b"
+#AQI_API_KEY = "af24c2ce21ec3076cdc8295685020505"
+#NEWS_API_KEY = "pub_60491a68299253d0f8fb3af5da4a31facb78f"
 cord={}
+@app.route('/admin', methods=['GET', 'POST'])
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    """
+    Displays the admin dashboard. Only accessible by the admin.
+    """
+    if 'username' not in session:
+        return redirect('/login')  # Redirect to login if the user is not logged in
+
+    username = session.get('username')
+    cursor.execute("SELECT is_admin FROM infosys WHERE username=?", (username,))
+    user = cursor.fetchone()
+    
+    if user and user[0] == 1:  # Check if the user is an admin
+        # Fetch all users
+        cursor.execute("SELECT * FROM infosys")
+        users = cursor.fetchall()
+        
+        # Fetch posts with usernames (join community_posts and infosys on username)
+        cursor.execute("""
+            SELECT community_posts.id, community_posts.title, infosys.username,community_posts.likes
+            FROM community_posts 
+            JOIN infosys ON community_posts.username = infosys.username
+        """)
+        posts = cursor.fetchall()
+
+        # Fetch comments
+        cursor.execute("SELECT * FROM comments")
+        comments = cursor.fetchall()
+        # Fetch leaderboard data
+        cursor.execute(""" 
+            SELECT user_id, city, 
+                   SUM(transport_distance * 0.2) + 
+                   SUM(previous_month_usage * 0.4) + 
+                   SUM(todays_usage * 0.3) + 
+                   SUM((dry_waste * 0.1) + (wet_waste * 0.1)) AS total_emissions
+            FROM carbon_tracker
+            GROUP BY user_id, city
+            ORDER BY total_emissions ASC
+        """)
+        leaderboard_data = cursor.fetchall()
+        
+        leaderboard = [
+            {"user_id": row[0], "city": row[1], "total_emissions": round(row[2], 2), "rank": index + 1}
+            for index, row in enumerate(leaderboard_data)
+        ]
+
+
+        # Handle user addition via POST request
+        if request.method == 'POST':
+            if 'add_post' in request.form:
+                # Handling adding a post
+                new_title = request.form['title']
+                if not new_title:
+                    return "Post title is required", 400
+
+                cursor.execute("INSERT INTO community_posts (title, username, likes) VALUES (?, ?, ?)", 
+                               (new_title, username, 0))  # Admin adds the post
+                connection.commit()
+                return redirect('/admin')  # Redirect to refresh the post list
+
+            elif 'add_user' in request.form:
+                # Handling adding a user
+                new_username = request.form['new_username']
+                new_password = request.form['new_password']  # Store plain password
+                is_admin = 0  # Default to non-admin user
+
+                try:
+                    cursor.execute("INSERT INTO infosys (username, password, is_admin) VALUES (?, ?, ?)", 
+                                   (new_username, new_password, is_admin))  # Store plain password
+                    connection.commit()
+                    return redirect('/admin')  # Redirect to refresh user list
+                except Exception as e:
+                    print(f"Error: {e}")
+                    return "An error occurred while adding the user.", 500
+
+        # Return admin page with all data
+        return render_template('admin.html', users=users, posts=posts, comments=comments,leaderboard=leaderboard)
+    else:
+        # Redirect non-admin users to the homepage or another appropriate page
+        return redirect('/index')  # If not an admin, redirect to the user dashboard
+
+@app.route('/delete_user/<string:user_id>', methods=['GET', 'POST'])
+def delete_user(user_id):
+    """
+    Admin can delete a user by username.
+    """
+    try:
+        if 'username' in session:
+            username = session['username']
+            cursor.execute("SELECT is_admin FROM infosys WHERE username=?", (username,))
+            user = cursor.fetchone()
+
+            if user and user[0] == 1:  # Admin check
+                cursor.execute("DELETE FROM infosys WHERE username=?", (user_id,))
+                connection.commit()
+                return redirect('/admin')  # Redirect to admin page after deletion
+        return redirect('/login')
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while deleting the user.", 500
+
+@app.route('/delete_post/<int:post_id>', methods=['GET', 'POST'])
+def delete_post(post_id):
+    """
+    Admin can delete a post by post_id.
+    """
+    try:
+        if 'username' in session:
+            username = session['username']
+            cursor.execute("SELECT is_admin FROM infosys WHERE username=?", (username,))
+            user = cursor.fetchone()
+
+            if user and user[0] == 1:  # Admin check
+                cursor.execute("DELETE FROM community_posts WHERE id=?", (post_id,))
+                cursor.execute("DELETE FROM comments WHERE post_id=?", (post_id,))
+                cursor.execute("DELETE FROM post_likes WHERE post_id=?", (post_id,))
+                connection.commit()
+                return redirect('/admin')  # Redirect to admin page after deletion
+        return redirect('/login')
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while deleting the post.", 500
+
+
+@app.route('/delete_comment/<int:comment_id>', methods=['GET', 'POST'])
+def delete_comment(comment_id):
+    """
+    Admin can delete a comment by comment_id.
+    """
+    try:
+        if 'username' in session:
+            username = session['username']
+            cursor.execute("SELECT is_admin FROM infosys WHERE username=?", (username,))
+            user = cursor.fetchone()
+
+            if user and user[0] == 1:  # Admin check
+                cursor.execute("DELETE FROM comments WHERE id=?", (comment_id,))
+                connection.commit()
+                return redirect('/admin')  # Redirect to admin page after deletion
+        return redirect('/login')
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while deleting the comment.", 500
+
+
 @app.route('/')
 def home():
     """
@@ -63,6 +209,7 @@ def login():
             # Store the username in the session
             session['username'] = username
             session['userId'] = user[0]
+            session['is_admin'] = user[2]
             session.permanent = True
             return redirect('/index')  # Redirect to the dashboard
         else:
@@ -443,13 +590,15 @@ def community():
         post_id = post[0]
         cursor.execute("SELECT * FROM comments WHERE post_id=?", (post_id,))
         comments = cursor.fetchall()
+        # Get total likes by counting entries in the post_likes table
+        cursor.execute("SELECT COUNT(*) FROM post_likes WHERE post_id=?", (post_id,))
+        like_count = cursor.fetchone()[0]
 
         post_list.append({
             'id': post[0],
             'title': post[1],
             'username': post[2],
-            'created_at': post[3],
-            'likes': post[4],
+            'likes': like_count,
             'comments': [{'user_id': comment[2], 'content': comment[3]} for comment in comments]
         })
 
@@ -463,46 +612,63 @@ def community():
 @app.route('/like_post/<int:post_id>', methods=['POST'])
 def like_post(post_id):
     """Increments the like count of a post."""
-    user_id = session.get('userId')  # Get the user ID from the session
+    user_id = session.get('userId')
     
-    if not user_id:  # If no user ID exists in the session, handle the error
-        return jsonify({'error': 'You must be logged in to like a post. Please log in and try again.'}), 403
+    if not user_id:
+        return jsonify({'error': 'You must be logged in to like a post'}), 403
 
     try:
         # Check if the user has already liked the post
         cursor.execute("SELECT * FROM post_likes WHERE post_id=? AND user_id=?", (post_id, user_id))
         existing_like = cursor.fetchone()
 
-        if existing_like:  # User already liked the post
-            return jsonify({'error': 'You have already liked this post.'}), 400
+        if existing_like:
+            return jsonify({'error': 'You have already liked this post'}), 400
+        
 
         # Insert the like into the post_likes table
-        cursor.execute("INSERT INTO post_likes (post_id, user_id) VALUES (?, ?)", (post_id, user_id))
+        cursor.execute("INSERT INTO post_likes (post_id, user_id,like_count) VALUES (?, ?,?)", (post_id, user_id,1))
         cursor.execute("UPDATE community_posts SET likes = likes + 1 WHERE id=?", (post_id,))
         connection.commit()
 
-        return jsonify({'success': True, 'message': 'Post liked successfully.'})
+        # Fetch the updated like count
+        cursor.execute("SELECT likes FROM community_posts WHERE id=?", (post_id,))
+        updated_likes = cursor.fetchone()[0]
+
+        return jsonify({'likes': updated_likes})
+    
     except Exception as e:
-        # Log the error and return an error response
         print(f"Error liking post: {e}")
-        return jsonify({'error': 'An error occurred while liking the post. Please try again later.'}), 500
+        return jsonify({'error': 'An error occurred while liking the post'}), 500
 
 @app.route('/add_comment/<int:post_id>', methods=['POST'])
 def add_comment(post_id):
     """Adds a comment to a specific post."""
     user_id = session.get('userId', 'Anonymous')
-    content = request.form.get('content')
+    
+    try:
+        data = request.get_json()
+        content = data.get('content')
 
-    if not content:
-        return jsonify({'error': 'Comment cannot be empty.'}), 400
+        if not content:
+            return jsonify({'error': 'Comment cannot be empty'}), 400
 
-    # Insert comment into the database
-    cursor.execute(
-        "INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)",
-        (post_id, user_id, content)
-    )
-    connection.commit()
-    return jsonify({'success': True})
+        # Insert comment into the database
+        cursor.execute(
+            "INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)",
+            (post_id, user_id, content)
+        )
+        connection.commit()
+
+        # Return the new comment data
+        return jsonify({
+            'success': True,
+            'user_id': user_id,
+            'content': content
+        })
+    except Exception as e:
+        print(f"Error adding comment: {e}")
+        return jsonify({'error': 'An error occurred while adding the comment'}), 500
 
 def get_user_id(username):
     """ Helper function to get user ID by username """
