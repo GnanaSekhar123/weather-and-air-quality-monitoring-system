@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            background-color: #343a40;
+            margin: 0;
+            padding: 20px 0;
+            font-size: 36px;
+        }
+
+        p {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+            margin: 20px 0;
+        }
+
+        h2, h3 {
+            color: #333;
+            font-size: 26px;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px;
+        }
+
+        li {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        a {
+            text-decoration: none;
+            color: #ff6347;
+            font-weight: bold;
+            background-color: #f8d7da;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        a:hover {
+            background-color: #e74a3b;
+            color: #fff;
+        }
+
+        .container {
+            width: 85%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .go-to-dashboard {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .go-to-dashboard a {
+            font-size: 18px;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 25px;
+            background-color: #007bff;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .go-to-dashboard a:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        label {
+            font-size: 18px;
+            color: #333;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            color: #555;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px;
+        }
+
+        th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            color: #333;
+        }
+
+        td {
+            background-color: #fff;
+            color: #555;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome, {{ session['username'] }}!</p>
+        
+        <h2>Manage Users</h2>
+        <ul>
+            {% for user in users %}
+                <li>
+                    {{ user[0] }} (username: {{ user[0] }}) 
+                    <a href="{{ url_for('delete_user', user_id=user[0]) }}">Delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h3>Add New User</h3>
+        <div class="form-container">
+            <form method="POST">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required><br><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required><br><br>
+                <button type="submit">Add User</button>
+            </form>
+        </div>
+        <h2>Leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User ID</th>
+                    <th>City</th>
+                    <th>Total Emissions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in leaderboard %}
+                <tr>
+                    <td>{{ entry.rank }}</td>
+                    <td>{{ entry.user_id }}</td>
+                    <td>{{ entry.city }}</td>
+                    <td>{{ entry.total_emissions }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Manage Posts</h2>
+<ul>
+    {% for post in posts %}
+        <li>
+            {{ post[1] }} (by {{ post[2] }}) 
+            <form action="{{ url_for('like_post', post_id=post[0]) }}" method="POST" style="display:inline;">
+                <button type="submit">Like</button>
+            </form>
+            <span>Likes: {{ post[3] }}</span> <!-- Display the like count -->
+            <a href="{{ url_for('delete_post', post_id=post[0]) }}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+
+        
+        <h3>Add New Post</h3>
+        <form method="POST">
+            <label for="title">Post Title:</label>
+            <input type="text" id="title" name="title" required><br><br>
+            <button type="submit" name="add_post">Add Post</button>
+        </form>
+
+        <h2>Manage Comments</h2>
+        <ul>
+            {% for comment in comments %}
+                <li>{{ comment[3] }} (User ID: {{ comment[2] }}) 
+                    <a href="{{ url_for('delete_comment', comment_id=comment[0]) }}">Delete</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="go-to-dashboard">
+            <a href="/index">Go to User Dashboard</a> <!-- Link to return to user dashboard -->
+        </div>
+    </div>
+</body>
+</html>
